@@ -1,0 +1,12 @@
+services:
+  db:
+    image: mysql:8.0  # Versão estável do MySQL
+    container_name: sistema-agendamento-sql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123  # Definam uma senha padrão para a dupla
+      MYSQL_DATABASE: Agendamentos   # O Docker cria esse banco automaticamente
+    ports:
+      - "3308:3306"   # Porta do PC : Porta do Container
+    volumes:
+      - ./mysql_data:/var/lib/mysql  # IMPORTANTE: Salva os dados numa pasta local
