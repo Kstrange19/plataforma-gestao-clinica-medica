@@ -1,0 +1,19 @@
+# --- Python ---
+__pycache__/
+*.pyc
+
+# --- Ambientes Virtuais ---
+.venv/
+venv/
+env/
+
+# --- Banco de Dados (Docker) ---
+# Ignora a pasta onde o volume do docker salva os dados
+mysql_data/
+
+# --- Arquivos de Sistema e IDE ---
+.vscode/
+.DS_Store
+
+# --- Variáveis de Ambiente (Senhas) ---
+.env
