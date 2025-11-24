@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS consultas (
         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
         cliente_id INT UNSIGNED,
         medico_id INT UNSIGNED,
-        data_consulta DATETIME,
+        data_consulta DATE,
         horario TIME,
         motivo VARCHAR(255),
         status VARCHAR(50),
@@ -36,10 +36,10 @@ CREATE TABLE IF NOT EXISTS consultas (
     );
 
 CREATE TABLE IF NOT EXISTS disponibilidade_medicos (
-        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-        medico_id INT UNSIGNED,
-        dia_semana VARCHAR(20),
-        horario_inicio TIME,
-        horario_fim TIME,
-        FOREIGN KEY (medico_id) REFERENCES medicos(id)
-    );
+    dia_semana ENUM('Domingo', 'Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta', 'Sabado') NOT NULL,
+    horario_inicio TIME NOT NULL,
+    horario_fim TIME NOT NULL,
+    FOREIGN KEY (medico_id) REFERENCES medicos(id),
+    -- Garante que o médico não tenha duas disponibilidades repetidas para o mesmo dia e horário
+    UNIQUE KEY unique_disponibilidade (medico_id, dia_semana, horario_inicio)
+);
