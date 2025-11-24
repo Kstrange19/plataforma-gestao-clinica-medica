@@ -1,4 +1,5 @@
 import sys
+from datetime import datetime, date
 import mysql.connector
 from mysql.connector import Error
 
@@ -9,7 +10,7 @@ def connect_db():
             port=3308,
             user="root",
             password="123",
-            database="Agendamentos",
+            database="clinica_medica",
         )
         print("Conexão bem-sucedida ao banco de dados.")
         return cnx
@@ -26,6 +27,37 @@ def register_client(name, age, email, phone):
         print("Cliente registrado com sucesso.")
     except Error as e:
         print(f"Erro ao registrar cliente: {e}")
+
+def verificar_disponibilidade_para_agendamento(medico_id, data_consulta, hora_consulta):
+    # 1. Descobrir qual é o dia da semana dessa data (Python datetime)
+    # Supondo que você já converteu a data para dia da semana (ex: 'Segunda')
+    dia_da_semana = data_consulta.strftime('%A')  # Exemplo: 'Monday', 'Tuesday', etc.
+
+    # 2. Verificar se existe horário cadastrado
+    query_horario = """
+        SELECT id FROM disponibilidade_medicos 
+        WHERE medico_id = %s 
+        AND dia_semana = %s
+        AND horario_inicio <= %s 
+        AND horario_fim > %s
+    """
+    cursor.execute(query_horario, (medico_id, dia_da_semana, hora_consulta, hora_consulta))
+    if not cursor.fetchone():
+        return False # Médico não atende nesse horário
+
+    # 3. Verificar se já existe consulta marcada (conflito)
+    query_conflito = """
+        SELECT id FROM consultas 
+        WHERE medico_id = %s 
+        AND data_consulta = %s 
+        AND horario = %s
+        AND status != 'Cancelada'
+    """
+    cursor.execute(query_conflito, (medico_id, data_consulta, hora_consulta))
+    if cursor.fetchone():
+        return False # Já tem alguém marcado
+
+    return True # Livre!
 
 cnx = connect_db()
 if cnx is None:
@@ -48,7 +80,7 @@ cursor.execute(
 
 cnx.commit()
 
-menu = {1: 'Registrar novo cliente', 2: 'Sair do programa'}
+menu = {1: 'Verificar disponibilidade', 2: 'Registrar novo cliente', 3: 'Sair do programa'}
 
 while True:
     print("Bem-vindo ao sistema de gestão de clínica médica.")
@@ -60,11 +92,22 @@ while True:
         print("Opção inválida. Tente novamente.")
         continue
     if choice == 1:
+        medico_id = input("ID do Médico: ")
+        data_input = input("Data da Consulta (YYYY-MM-DD): ")
+        hora_input = input("Hora da Consulta (HH:MM:SS): ")
+        data_consulta = datetime.strptime(data_input, '%Y-%m-%d').date()
+        hora_consulta = datetime.strptime(hora_input, '%H:%M:%S').time()
+        disponivel = verificar_disponibilidade_para_agendamento(medico_id, data_consulta, hora_consulta)
+        if disponivel:
+            print("O horário está disponível para agendamento.")
+        else:
+            print("O horário não está disponível para agendamento.")
+    if choice == 2:
         name = input("Nome: ")
         age = input("Idade: ")
         email = input("Email: ")
         phone = input("Telefone: ")
         register_client(name, age, email, phone)
-    elif choice == 2:
+    elif choice == 3:
         print("Saindo do programa.")
         break
