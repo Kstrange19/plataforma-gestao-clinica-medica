@@ -7,8 +7,9 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: 123  # Definam uma senha padrão para a dupla
-      MYSQL_DATABASE: Agendamentos   # O Docker cria esse banco automaticamente
+      MYSQL_DATABASE: clinica_medica   # O Docker cria esse banco automaticamente
     ports:
       - "3308:3306"   # Porta do PC : Porta do Container
     volumes:
       - ./mysql_data:/var/lib/mysql  # IMPORTANTE: Salva os dados numa pasta local
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql  # Inicializa o banco com o schema
