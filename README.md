@@ -14,7 +14,7 @@ Projeto de desenvolvimento de uma plataforma de gestão de clínica médica com 
 - Modelo relacional (MySQL 8.0)
 
 ### Entidades Principais
-- Sem entidades criadas.
+- **Clientes**: dados dos clientes
 /// Exemplo : **[Nome da Entidade]**: [Descrição]
 
 ### Relacionamentos
