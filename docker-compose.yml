@@ -1,6 +1,8 @@
 services:
   db:
     image: mysql:8.0  # Versão estável do MySQL
+    # Força o plugin de autenticação antigo (compatível com a maioria dos clientes Python)
+    command: --default-authentication-plugin=mysql_native_password
     container_name: sistema-agendamento-sql
     restart: always
     environment:
