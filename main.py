@@ -17,10 +17,10 @@ def connect_db():
         print(f"Erro ao conectar ao banco de dados: {e}")
         return None
 
-def register_client(name, age, email, phone, city):
+def register_client(name, age, email, phone):
     try:
-        sql = "INSERT INTO clientes (nome, idade, email, telefone, cidade) VALUES (%s, %s, %s, %s, %s)"
-        values = (name, age if age != '' else None, email, phone, city)
+        sql = "INSERT INTO clientes (nome, idade, email, telefone) VALUES (%s, %s, %s, %s)"
+        values = (name, age if age != '' else None, email, phone)
         cursor.execute(sql, values)
         cnx.commit()
         print("Cliente registrado com sucesso.")
@@ -41,8 +41,7 @@ cursor.execute(
         nome VARCHAR(255) NOT NULL,
         idade INT,
         email VARCHAR(255),
-        telefone VARCHAR(50),
-        cidade VARCHAR(100)
+        telefone VARCHAR(50)
     ) ENGINE=InnoDB;
     """
 )
@@ -65,8 +64,7 @@ while True:
         age = input("Idade: ")
         email = input("Email: ")
         phone = input("Telefone: ")
-        city = input("Cidade: ")
-        register_client(name, age, email, phone, city)
+        register_client(name, age, email, phone)
     elif choice == 2:
         print("Saindo do programa.")
         break
