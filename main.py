@@ -43,12 +43,31 @@ def register_doctor(name, specialty, phone, email):
     except Error as e:
         print(f"Erro ao registrar médico: {e}")
 
-def verificar_disponibilidade_para_agendamento(medico_id, data_consulta, hora_consulta):
-    # 1. Descobrir qual é o dia da semana dessa data (Python datetime)
-    # Supondo que você já converteu a data para dia da semana (ex: 'Segunda')
-    dia_semana = data_consulta.strftime('%A')  # Exemplo: 'Monday', 'Tuesday', etc.
+def agendar_consulta(medico_id, cliente_id, data_consulta, hora_consulta):
+    try:
+        sql = "INSERT INTO consultas (medico_id, cliente_id, data_consulta, horario, status) VALUES (%s, %s, %s, %s, %s)"
+        values = (medico_id, cliente_id, data_consulta, hora_consulta, 'Agendada')
+        cursor.execute(sql, values)
+        cnx.commit()
+        print("Consulta agendada com sucesso.")
+    except Error as e:
+        print(f"Erro ao agendar consulta: {e}")
 
-    # 2. Verificar se existe horário cadastrado
+def verificar_disponibilidade_para_agendamento(medico_id, data_consulta, hora_consulta):
+    """ Verifica se o médico está disponível para agendamento na data e hora fornecidas. """
+    dias_traducao = {
+    'Monday': 'Segunda',
+    'Tuesday': 'Terca',
+    'Wednesday': 'Quarta',
+    'Thursday': 'Quinta',
+    'Friday': 'Sexta',
+    'Saturday': 'Sabado',
+    'Sunday': 'Domingo'
+    }
+    dia_ingles = data_consulta.strftime('%A')
+    dia_semana = dias_traducao[dia_ingles] # Agora busca em Português
+
+    # Verificar se existe horário cadastrado
     query_horario = """
         SELECT id FROM disponibilidade_medicos 
         WHERE medico_id = %s 
@@ -60,7 +79,7 @@ def verificar_disponibilidade_para_agendamento(medico_id, data_consulta, hora_co
     if not cursor.fetchone():
         return False # Médico não atende nesse horário
 
-    # 3. Verificar se já existe consulta marcada (conflito)
+    # Verificar se já existe consulta marcada (prevenir conflito)
     query_conflito = """
         SELECT id FROM consultas 
         WHERE medico_id = %s 
@@ -107,7 +126,11 @@ while True:
         print("Opção inválida. Tente novamente.")
         continue
     if choice == 1:
-        medico_id = input("ID do Médico: ")
+        try:
+            medico_id = int(input("ID do Médico: "))
+        except ValueError:
+            print("ID inválido. Tente novamente.")
+            continue
         data_input = input("Data da Consulta (YYYY-MM-DD): ")
         hora_input = input("Hora da Consulta (HH:MM:SS): ")
         data_consulta = datetime.strptime(data_input, '%Y-%m-%d').date()
@@ -121,22 +144,19 @@ while True:
         except Error as e:
             print(f"Erro ao verificar disponibilidade: {e}")
     elif choice == 2:
-        medico_id = input("ID do Médico: ")
-        cliente_id = input("ID do Cliente: ")
+        try:
+            medico_id = int(input("ID do Médico: "))
+            cliente_id = int(input("ID do Cliente: "))
+        except ValueError:
+            print("ID inválido. Tente novamente.")
+            continue
         data_input = input("Data da Consulta (YYYY-MM-DD): ")
         hora_input = input("Hora da Consulta (HH:MM:SS): ")
         data_consulta = datetime.strptime(data_input, '%Y-%m-%d').date()
         hora_consulta = datetime.strptime(hora_input, '%H:%M:%S').time()
         disponivel = verificar_disponibilidade_para_agendamento(medico_id, data_consulta, hora_consulta)
         if disponivel:
-            try:
-                sql = "INSERT INTO consultas (medico_id, cliente_id, data_consulta, horario, status) VALUES (%s, %s, %s, %s, %s)"
-                values = (medico_id, cliente_id, data_consulta, hora_consulta, 'Agendada')
-                cursor.execute(sql, values)
-                cnx.commit()
-                print("Consulta agendada com sucesso.")
-            except Error as e:
-                print(f"Erro ao agendar consulta: {e}")
+            agendar_consulta(medico_id, cliente_id, data_consulta, hora_consulta)
         else:
             print("O horário não está disponível para agendamento.")
     elif choice == 3:
@@ -145,7 +165,7 @@ while True:
         email = input("Email: ")
         phone = input("Telefone: ")
         register_client(name, age, email, phone)
-    elif choice == 3:
+    elif choice == 4:
         name = input("Nome: ")
         specialty = input("Especialidade: ")
         phone = input("Telefone: ")
