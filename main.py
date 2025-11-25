@@ -95,7 +95,7 @@ cursor.execute(
 
 cnx.commit()
 
-menu = {1: 'Verificar disponibilidade', 2: 'Cadastrar cliente', 3: 'Cadastrar médico', 0: 'Sair do programa'}
+menu = {1: 'Verificar disponibilidade', 2: 'Agendar consulta', 3: 'Cadastrar cliente', 4: 'Cadastrar médico', 0: 'Sair do programa'}
 
 while True:
     print("\nBem-vindo ao sistema de gestão de clínica médica.")
@@ -112,12 +112,34 @@ while True:
         hora_input = input("Hora da Consulta (HH:MM:SS): ")
         data_consulta = datetime.strptime(data_input, '%Y-%m-%d').date()
         hora_consulta = datetime.strptime(hora_input, '%H:%M:%S').time()
+        try:
+            disponivel = verificar_disponibilidade_para_agendamento(medico_id, data_consulta, hora_consulta)
+            if disponivel:
+                print("O horário está disponível para agendamento.")
+            else:
+                print("O horário não está disponível para agendamento.")
+        except Error as e:
+            print(f"Erro ao verificar disponibilidade: {e}")
+    elif choice == 2:
+        medico_id = input("ID do Médico: ")
+        cliente_id = input("ID do Cliente: ")
+        data_input = input("Data da Consulta (YYYY-MM-DD): ")
+        hora_input = input("Hora da Consulta (HH:MM:SS): ")
+        data_consulta = datetime.strptime(data_input, '%Y-%m-%d').date()
+        hora_consulta = datetime.strptime(hora_input, '%H:%M:%S').time()
         disponivel = verificar_disponibilidade_para_agendamento(medico_id, data_consulta, hora_consulta)
         if disponivel:
-            print("O horário está disponível para agendamento.")
+            try:
+                sql = "INSERT INTO consultas (medico_id, cliente_id, data_consulta, horario, status) VALUES (%s, %s, %s, %s, %s)"
+                values = (medico_id, cliente_id, data_consulta, hora_consulta, 'Agendada')
+                cursor.execute(sql, values)
+                cnx.commit()
+                print("Consulta agendada com sucesso.")
+            except Error as e:
+                print(f"Erro ao agendar consulta: {e}")
         else:
             print("O horário não está disponível para agendamento.")
-    elif choice == 2:
+    elif choice == 3:
         name = input("Nome: ")
         age = input("Idade: ")
         email = input("Email: ")
