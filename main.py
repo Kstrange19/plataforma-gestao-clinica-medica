@@ -28,10 +28,25 @@ def register_client(name, age, email, phone):
     except Error as e:
         print(f"Erro ao registrar cliente: {e}")
 
+def register_doctor(name, specialty, phone, email):
+    try:
+        sql = "INSERT INTO medicos (nome, especialidade, telefone, email) VALUES (%s, %s, %s, %s)"
+        credential = "SELECT * FROM medicos WHERE nome = %s"
+        values = (name, specialty, phone, email)
+        cursor.execute(sql, values)
+        cnx.commit()
+        print("Médico registrado com sucesso.\n")
+        cursor.execute(credential, (name,))
+        credential = cursor.fetchall()
+        for row in credential:
+            print(f"= Credenciais do médico =\nID: {row[0]}\nNome: {row[1]}\nEspecialidade: {row[2]}\nTelefone: {row[3]}\nEmail: {row[4]}")
+    except Error as e:
+        print(f"Erro ao registrar médico: {e}")
+
 def verificar_disponibilidade_para_agendamento(medico_id, data_consulta, hora_consulta):
     # 1. Descobrir qual é o dia da semana dessa data (Python datetime)
     # Supondo que você já converteu a data para dia da semana (ex: 'Segunda')
-    dia_da_semana = data_consulta.strftime('%A')  # Exemplo: 'Monday', 'Tuesday', etc.
+    dia_semana = data_consulta.strftime('%A')  # Exemplo: 'Monday', 'Tuesday', etc.
 
     # 2. Verificar se existe horário cadastrado
     query_horario = """
@@ -41,7 +56,7 @@ def verificar_disponibilidade_para_agendamento(medico_id, data_consulta, hora_co
         AND horario_inicio <= %s 
         AND horario_fim > %s
     """
-    cursor.execute(query_horario, (medico_id, dia_da_semana, hora_consulta, hora_consulta))
+    cursor.execute(query_horario, (medico_id, dia_semana, hora_consulta, hora_consulta))
     if not cursor.fetchone():
         return False # Médico não atende nesse horário
 
@@ -80,10 +95,10 @@ cursor.execute(
 
 cnx.commit()
 
-menu = {1: 'Verificar disponibilidade', 2: 'Registrar novo cliente', 3: 'Sair do programa'}
+menu = {1: 'Verificar disponibilidade', 2: 'Cadastrar cliente', 3: 'Cadastrar médico', 0: 'Sair do programa'}
 
 while True:
-    print("Bem-vindo ao sistema de gestão de clínica médica.")
+    print("\nBem-vindo ao sistema de gestão de clínica médica.")
     for key, value in menu.items():
         print(f"{key}. {value}")
     try:
@@ -102,12 +117,18 @@ while True:
             print("O horário está disponível para agendamento.")
         else:
             print("O horário não está disponível para agendamento.")
-    if choice == 2:
+    elif choice == 2:
         name = input("Nome: ")
         age = input("Idade: ")
         email = input("Email: ")
         phone = input("Telefone: ")
         register_client(name, age, email, phone)
     elif choice == 3:
+        name = input("Nome: ")
+        specialty = input("Especialidade: ")
+        phone = input("Telefone: ")
+        email = input("Email: ")
+        register_doctor(name, specialty, phone, email)
+    elif choice == 0:
         print("Saindo do programa.")
         break
