@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS consultas (
         FOREIGN KEY (medico_id) REFERENCES medicos(id)
 );
 
-CREATE TABLE disponibilidade_medicos (
+CREATE TABLE horarios_atendimento (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     medico_id INT UNSIGNED,
     dia_semana VARCHAR(20), 
@@ -45,7 +45,7 @@ CREATE TABLE disponibilidade_medicos (
 );
 
 INSERT INTO medicos (nome, especialidade, email, telefone) VALUES
-('Paulo Roberto', 'Pneumologia', 'prmnasc@clinica.com','21965386364',),
+('Paulo Roberto', 'Pneumologia', 'prmnasc@clinica.com','21965386364'),
 ('Ewerton Madruga', 'Dermatologia', 'elmadruga@clinica.com', '21994485533'),
 ('Wladimir Chapetta', 'Endocrinologia', 'wcchapetta@clinica.com', '21999999999'),
 ('Roberto Amaral', 'Cardiologia',  'rlamaral@clinica.com', '21992668215'),
