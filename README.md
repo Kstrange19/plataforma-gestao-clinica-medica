@@ -9,12 +9,16 @@ Projeto de desenvolvimento de uma plataforma de gestão de clínica médica com 
 
 ## Tecnologias Utilizadas
 - MySQL Workbench 8.0
+- Python 3.12.3
 
 ## Modelo de Dados
 - Modelo relacional (MySQL 8.0)
 
 ### Entidades Principais
-- **Clientes**: dados dos clientes
+- **clientes**: credenciais dos clientes
+- **medicos**: credenciais dos médicos
+- **consultas**: agendamentos
+- **disponibilidade_medicos**: horários de atendimento de cada médico
 /// Exemplo : **[Nome da Entidade]**: [Descrição]
 
 ### Relacionamentos
