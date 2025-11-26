@@ -69,7 +69,7 @@ def verificar_disponibilidade_para_agendamento(medico_id, data_consulta, hora_co
 
     # Verificar se existe horário cadastrado
     query_horario = """
-        SELECT id FROM disponibilidade_medicos 
+        SELECT id FROM horarios_atendimento 
         WHERE medico_id = %s 
         AND dia_semana = %s
         AND horario_inicio <= %s 
