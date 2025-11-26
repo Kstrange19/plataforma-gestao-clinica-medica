@@ -11,9 +11,9 @@ CREATE TABLE IF NOT EXISTS medicos (
         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
         nome VARCHAR(255) NOT NULL,
         especialidade VARCHAR(50) NOT NULL,
-        email VARCHAR(255) UNIQUE NOT NULL
-        telefone VARCHAR(11) UNIQUE NOT NULL,
-    );
+        email VARCHAR(255) UNIQUE NOT NULL,
+        telefone VARCHAR(11) UNIQUE NOT NULL
+);
 
 CREATE TABLE IF NOT EXISTS clientes (
         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS clientes (
         idade INT NOT NULL,
         email VARCHAR(100) UNIQUE NOT NULL,
         telefone VARCHAR(11)
-    );
+);
 
 CREATE TABLE IF NOT EXISTS consultas (
         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS consultas (
         status VARCHAR(50),
         FOREIGN KEY (cliente_id) REFERENCES clientes(id),
         FOREIGN KEY (medico_id) REFERENCES medicos(id)
-    );
+);
 
 CREATE TABLE disponibilidade_medicos (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
