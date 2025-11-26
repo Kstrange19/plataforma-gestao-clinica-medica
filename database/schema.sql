@@ -71,8 +71,8 @@ INSERT INTO consultas (cliente_id, medico_id, data_consulta, horario, motivo, st
 INSERT INTO horarios_atendimento (medico_id, dia_semana, horario_inicio, horario_fim) VALUES
 (1, 'Segunda', '07:30:00', '11:00:00'),
 (1, 'Segunda', '13:00:00', '16:30:00'),
-(2, 'Terça', '07:30:00', '11:00:00'),
-(2, 'Terça', '13:00:00', '18:00:00'),
+(2, 'Terca', '07:30:00', '11:00:00'),
+(2, 'Terca', '13:00:00', '18:00:00'),
 (3, 'Quarta', '07:30:00', '11:00:00'),
 (3, 'Quarta', '13:00:00', '16:00:00'),
 (4, 'Quinta', '07:30:00', '11:00:00'),
