@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS clientes (
         nome VARCHAR(255) NOT NULL,
         idade INT NOT NULL,
         email VARCHAR(100) UNIQUE NOT NULL,
-        telefone VARCHAR(11)
+        telefone VARCHAR(11),
+        tipo_sanguineo ENUM('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-') NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS consultas (
@@ -44,6 +45,26 @@ CREATE TABLE horarios_atendimento (
     FOREIGN KEY (medico_id) REFERENCES medicos(id)
 );
 
+-- Catálogo de Condições (Doenças, Alergias, Comorbidades)
+CREATE TABLE IF NOT EXISTS catalogo_condicoes (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE,
+    tipo ENUM('Fumante', 'Alergia', 'Doença Crônica', 'Cirurgia', 'Medicamento regular', 'Outros') NOT NULL
+);
+
+-- Liga o Paciente à Condição e permite adicionar uma observação
+CREATE TABLE IF NOT EXISTS ficha_paciente (
+    cliente_id INT UNSIGNED,
+    condicao_id INT UNSIGNED,
+    data_registro DATE DEFAULT (CURRENT_DATE),
+    observacoes VARCHAR(255), -- Ex: 'Teve crise em 2020', 'Grau leve'
+    -- A chave primária é a dupla (Cliente + Condição), permitindo várias doenças por paciente sem duplicatas
+    PRIMARY KEY (cliente_id, condicao_id),
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id),
+    FOREIGN KEY (condicao_id) REFERENCES catalogo_condicoes(id)
+);
+
+
 INSERT INTO medicos (nome, especialidade, email, telefone) VALUES
 ('Paulo Roberto', 'Pneumologia', 'prmnasc@clinica.com','21965386364'),
 ('Ewerton Madruga', 'Dermatologia', 'elmadruga@clinica.com', '21994485533'),
@@ -52,13 +73,13 @@ INSERT INTO medicos (nome, especialidade, email, telefone) VALUES
 ('Mariana Carla', 'Ginecologia', 'marianacarla@clinica.com', '21979681241'),
 ('Antônio Lacerda', 'Psiquiatria', 'aljunior@clinica.com', '24981543287');
 
-INSERT INTO clientes (nome, idade, email, telefone) VALUES
-('Kauã Amado', 17, 'kauaamado5@gmail.com', '21974392787'),
-('Moises Campos', 18, 'moiseshoc27@gmail.com', '21972701348'),
-('Estevão Martins', 17, 'estevaomartins@gmail.com', '21972963756'),
-('Matheus Marques', 18, 'marquesaraujomatheus7@gmail.com', '21979513613'),
-('Raphael Furtado', 16, 'raphaelfurtado120@gmail.com', '21980979950'),
-('Dominique Gomes', 17, 'niquegbarbosa@gmail.com', '21970763935');
+INSERT INTO clientes (nome, idade, email, telefone, tipo_sanguineo) VALUES
+('Kauã Amado', 17, 'kauaamado5@gmail.com', '21974392787', 'A+'),
+('Moises Campos', 18, 'moiseshoc27@gmail.com', '21972701348', 'O-'),
+('Estevão Martins', 17, 'estevaomartins@gmail.com', '21972963756', 'B+'),
+('Matheus Marques', 18, 'marquesaraujomatheus7@gmail.com', '21979513613', 'AB+'),
+('Raphael Furtado', 16, 'raphaelfurtado120@gmail.com', '21980979950', 'O+'),
+('Dominique Gomes', 17, 'niquegbarbosa@gmail.com', '21970763935', 'A-');
 
 INSERT INTO consultas (cliente_id, medico_id, data_consulta, horario, motivo, status) VALUES
 (1, 1, '2024-12-2', '10:00:00', 'Tosse com sangue', 'Agendada'),
@@ -85,3 +106,20 @@ INSERT INTO horarios_atendimento (medico_id, dia_semana, horario_inicio, horario
 (6, 'Quarta', '13:00:00', '17:00:00'),
 (6, 'Quinta', '08:00:00', '12:00:00'),
 (6, 'Quinta', '13:00:00', '17:00:00');
+
+INSERT INTO catalogo_condicoes (nome, tipo) VALUES 
+('Penicilina', 'Alergia'),      -- Para a pergunta "Tem alergia a algum medicamento?"
+('Dipirona', 'Alergia'),
+('Hipertensão', 'Doença Crônica'),      -- Para a pergunta "Possui alguma doença crônica?"
+('Diabetes Tipo 2', 'Doença Crônica'),
+('Tabagismo', 'Fumante'),       -- Para a pergunta "É fumante?"
+('Sedentarismo', 'Outros'),     -- Para a pergunta "Exercícios regulares? ( ) Não"
+('Consumo de Álcool', 'Outros'),        -- Para a pergunta "Consome bebida alcoólica?"
+('Frutos do Mar', 'Alergia'), -- Exemplo para "Alimento que não possa consumir"
+('Intolerância a Lactose', 'Alergia'),
+('Insulina', 'Medicamento regular'),
+('Apendicectomia', 'Cirurgia'); -- Exemplo para "Já passou por alguma cirurgia?"
+
+INSERT INTO ficha_paciente (cliente_id, condicao_id, observacoes) VALUES 
+(1, 2, 'Teve reação na infância'),
+(1, 3, 'Controlada com remédios');
