@@ -58,7 +58,7 @@ python3 -m venv .venv
 # No Linux/Mac:
 source .venv/bin/activate
 # No Windows (PowerShell):
-# .venv\Scripts\Activate
+.venv\Scripts\Activate
 
 # 3. Instale a biblioteca de conexão com o MySQL
 pip install mysql-connector-python
