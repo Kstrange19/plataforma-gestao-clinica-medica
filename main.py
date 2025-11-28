@@ -11,8 +11,6 @@ def connect_db():
             user="root",
             password="123",
             database="clinica_medica",
-            charset='utf8mb4',
-            collation='utf8mb4_unicode_ci'
         )
         print("Conexão bem-sucedida ao banco de dados.")
         return cnx
@@ -20,26 +18,19 @@ def connect_db():
         print(f"Erro ao conectar ao banco de dados: {e}")
         return None
 
-def register_client(name, age, email, phone, blood_type):
+def register_client(name, age, email, phone):
     try:
         sql = "INSERT INTO clientes (nome, idade, email, telefone, tipo_sanguineo) VALUES (%s, %s, %s, %s, %s)"
-        values = (name, age if age != '' else None, email, phone, blood_type)
+        values = (name, age if age != '' else None, email, phone)
         cursor.execute(sql, values)
         cnx.commit()
-        
-        # Pega o ID do cliente recém-criado para vincular a ficha
-        client_id = cursor.lastrowid
         print("Cliente registrado com sucesso.")
-        
-        # Chama a triagem automaticamente
-        print("\n--- Iniciando Preenchimento da Ficha Médica ---")
-        fill_medical_record(client_id)
-        
     except Error as e:
         print(f"Erro ao registrar cliente: {e}")
 
-# Nova Funcionalidade: Preenchimento da Ficha (Triagem)
+# Função para preencher a ficha médica do paciente
 def fill_medical_record(client_id):
+    # Perguntas baseadas no catálogo de condições
     print("Por favor, responda às perguntas de triagem:")
     
     # Pergunta 1: Fumante?
@@ -57,6 +48,7 @@ def fill_medical_record(client_id):
     response = input("Possui alguma alergia? (s/n): ").lower()
     if response == 's':
         allergy = input("Qual alergia? ")
+        # Aqui o ideal seria buscar no catálogo, mas vamos simplificar inserindo diretamente
         add_to_medical_record(client_id, 'Alergia Genérica', 'Alergia', f"Alergia a: {allergy}")
 
     print("Ficha médica atualizada com sucesso!")
@@ -70,6 +62,7 @@ def add_to_medical_record(client_id, condition_name, condition_type, note):
         if result:
             condition_id = result[0]
             
+            # Insere na tabela associativa (FICHA)
             sql = """
                 INSERT INTO ficha_paciente (cliente_id, condicao_id, observacoes) 
                 VALUES (%s, %s, %s)
@@ -97,29 +90,29 @@ def register_doctor(name, specialty, phone, email):
     except Error as e:
         print(f"Erro ao registrar médico: {e}")
 
-def agendar_consulta(medico_id, cliente_id, data_consulta, hora_consulta):
+def schedule_appointment(doctor_id, client_id, appointment_date, appointment_time):
     try:
         sql = "INSERT INTO consultas (medico_id, cliente_id, data_consulta, horario, status) VALUES (%s, %s, %s, %s, %s)"
-        values = (medico_id, cliente_id, data_consulta, hora_consulta, 'Agendada')
+        values = (doctor_id, client_id, appointment_date, appointment_time, 'Agendada')
         cursor.execute(sql, values)
         cnx.commit()
         print("Consulta agendada com sucesso.")
     except Error as e:
         print(f"Erro ao agendar consulta: {e}")
 
-def verificar_disponibilidade_para_agendamento(medico_id, data_consulta, hora_consulta):
+def check_appointment_availability(doctor_id, appointment_date, appointment_time):
     """ Verifica se o médico está disponível para agendamento na data e hora fornecidas. """
     days_translation = {
-        'Monday': 'Segunda',
-        'Tuesday': 'Terca',
-        'Wednesday': 'Quarta',
-        'Thursday': 'Quinta',
-        'Friday': 'Sexta',
-        'Saturday': 'Sabado',
-        'Sunday': 'Domingo'
+    'Monday': 'Segunda',
+    'Tuesday': 'Terca',
+    'Wednesday': 'Quarta',
+    'Thursday': 'Quinta',
+    'Friday': 'Sexta',
+    'Saturday': 'Sabado',
+    'Sunday': 'Domingo'
     }
-    english_day = data_consulta.strftime('%A')
-    weekday = days_translation.get(english_day) # Busca em Português
+    english_day = appointment_date.strftime('%A')
+    weekday = days_translation[english_day] # Busca em Português
 
     # Verifica se existe horário cadastrado
     time_query = """
@@ -129,7 +122,8 @@ def verificar_disponibilidade_para_agendamento(medico_id, data_consulta, hora_co
         AND horario_inicio <= %s 
         AND horario_fim > %s
     """
-    cursor.execute(time_query, (medico_id, weekday, hora_consulta, hora_consulta))
+
+    cursor.execute(time_query, (doctor_id, weekday, appointment_time, appointment_time))
     if not cursor.fetchone():
         return False # Médico não atende nesse horário
 
@@ -141,19 +135,32 @@ def verificar_disponibilidade_para_agendamento(medico_id, data_consulta, hora_co
         AND horario = %s
         AND status != 'Cancelada'
     """
-    cursor.execute(conflict_query, (medico_id, data_consulta, hora_consulta))
+    cursor.execute(conflict_query, (doctor_id, appointment_date, appointment_time))
     if cursor.fetchone():
         return False # Já tem alguém marcado
 
     return True # Livre!
-
-# --- EXECUÇÃO PRINCIPAL ---
 
 cnx = connect_db()
 if cnx is None:
     sys.exit(1)
 
 cursor = cnx.cursor()
+
+# Cria a tabela 'clientes' se não existir
+cursor.execute(
+    """
+    CREATE TABLE IF NOT EXISTS clientes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nome VARCHAR(255) NOT NULL,
+        idade INT,
+        email VARCHAR(255),
+        telefone VARCHAR(50)
+    ) ENGINE=InnoDB;
+    """
+)
+
+cnx.commit()
 
 menu = {1: 'Verificar disponibilidade', 2: 'Agendar consulta', 3: 'Cadastrar cliente', 4: 'Cadastrar médico', 0: 'Sair do programa'}
 
@@ -166,67 +173,53 @@ while True:
     except ValueError:
         print("Opção inválida. Tente novamente.")
         continue
-
     if choice == 1:
         try:
-            medico_id = int(input("ID do Médico: "))
+            doctor_id = int(input("ID do Médico: "))
         except ValueError:
             print("ID inválido. Tente novamente.")
             continue
-        data_input = input("Data da Consulta (YYYY-MM-DD): ")
-        hora_input = input("Hora da Consulta (HH:MM:SS): ")
-        
+        date_input = input("Data da Consulta (YYYY-MM-DD): ")
+        time_input = input("Hora da Consulta (HH:MM:SS): ")
+        appointment_date = datetime.strptime(date_input, '%Y-%m-%d').date()
+        appointment_time = datetime.strptime(time_input, '%H:%M:%S').time()
         try:
-            data_consulta = datetime.strptime(data_input, '%Y-%m-%d').date()
-            hora_consulta = datetime.strptime(hora_input, '%H:%M:%S').time()
-            
-            disponivel = verificar_disponibilidade_para_agendamento(medico_id, data_consulta, hora_consulta)
-            if disponivel:
+            is_available = check_appointment_availability(doctor_id, appointment_date, appointment_time)
+            if is_available:
                 print("O horário está disponível para agendamento.")
             else:
                 print("O horário não está disponível para agendamento.")
-        except ValueError:
-            print("Formato de data ou hora inválido.")
         except Error as e:
             print(f"Erro ao verificar disponibilidade: {e}")
-
     elif choice == 2:
         try:
-            medico_id = int(input("ID do Médico: "))
-            cliente_id = int(input("ID do Cliente: "))
+            doctor_id = int(input("ID do Médico: "))
+            client_id = int(input("ID do Cliente: "))
         except ValueError:
             print("ID inválido. Tente novamente.")
             continue
-        data_input = input("Data da Consulta (YYYY-MM-DD): ")
-        hora_input = input("Hora da Consulta (HH:MM:SS): ")
-        
-        try:
-            data_consulta = datetime.strptime(data_input, '%Y-%m-%d').date()
-            hora_consulta = datetime.strptime(hora_input, '%H:%M:%S').time()
-            
-            disponivel = verificar_disponibilidade_para_agendamento(medico_id, data_consulta, hora_consulta)
-            if disponivel:
-                agendar_consulta(medico_id, cliente_id, data_consulta, hora_consulta)
-            else:
-                print("O horário não está disponível para agendamento.")
-        except ValueError:
-             print("Formato de data ou hora inválido.")
-
+        date_input = input("Data da Consulta (YYYY-MM-DD): ")
+        time_input = input("Hora da Consulta (HH:MM:SS): ")
+        appointment_date = datetime.strptime(date_input, '%Y-%m-%d').date() # Converte para o formato date
+        appointment_time = datetime.strptime(time_input, '%H:%M:%S').time() # Converte para o formato time
+        is_available = check_appointment_availability(doctor_id, appointment_date, appointment_time)
+        if is_available:
+            schedule_appointment(doctor_id, client_id, appointment_date, appointment_time)
+        else:
+            print("O horário não está disponível para agendamento.")
     elif choice == 3:
         name = input("Nome: ")
         age = input("Idade: ")
         email = input("Email: ")
         phone = input("Telefone: ")
-        blood_type = input("Tipo Sanguíneo (A+, O-, etc): ").upper()
-        register_client(name, age, email, phone, blood_type)
-
+        blood_type = input("Tipo Sanguíneo: ")
+        register_client(name, age, email, phone)
     elif choice == 4:
         name = input("Nome: ")
         specialty = input("Especialidade: ")
         phone = input("Telefone: ")
         email = input("Email: ")
         register_doctor(name, specialty, phone, email)
-
     elif choice == 0:
         print("Saindo do programa.")
         break
