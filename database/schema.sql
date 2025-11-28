@@ -4,8 +4,9 @@
 -- Autores: Kauã Amado (Kstrange19) e Moisés Henrique (moises-h7)
 -- Data: 02/12/2025
 -- =============================================
-CREATE DATABASE IF NOT EXISTS clinica_medica;
+CREATE DATABASE IF NOT EXISTS clinica_medica CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE clinica_medica;
+SET NAMES utf8mb4; -- Garante que os inserts do arquivo sejam lidos corretamente (ç, ã, etc).
 
 CREATE TABLE IF NOT EXISTS medicos (
         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

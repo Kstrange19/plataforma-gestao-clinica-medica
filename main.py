@@ -11,6 +11,8 @@ def connect_db():
             user="root",
             password="123",
             database="clinica_medica",
+            charset='utf8mb4',
+            collation='utf8mb4_unicode_ci'
         )
         print("Conexão bem-sucedida ao banco de dados.")
         return cnx
