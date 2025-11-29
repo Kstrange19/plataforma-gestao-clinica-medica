@@ -124,3 +124,74 @@ INSERT INTO catalogo_condicoes (nome, tipo) VALUES
 INSERT INTO ficha_paciente (cliente_id, condicao_id, observacoes) VALUES 
 (1, 2, 'Teve reação na infância'),
 (1, 3, 'Controlada com remédios');
+
+-- VIEWS DO SISTEMA
+-- View: consultas com nome do cliente e do médico
+CREATE OR REPLACE VIEW vw_consultas_completas AS
+SELECT 
+    c.id AS consulta_id,
+    cli.nome AS cliente,
+    m.nome AS medico,
+    m.especialidade,
+    c.data_consulta,
+    c.horario,
+    c.motivo,
+    c.status
+FROM consultas c
+JOIN clientes cli ON c.cliente_id = cli.id
+JOIN medicos m ON c.medico_id = m.id;
+
+-- View: consultas futuras
+CREATE OR REPLACE VIEW vw_consultas_futuras AS
+SELECT *
+FROM vw_consultas_completas
+WHERE data_consulta >= CURRENT_DATE;
+
+-- View: pacientes com condições cadastradas
+CREATE OR REPLACE VIEW vw_pacientes_com_condicoes AS
+SELECT 
+    cli.id AS cliente_id,
+    cli.nome,
+    cli.idade,
+    cli.email,
+    cli.telefone,
+    cli.tipo_sanguineo,
+    cc.nome AS condicao,
+    cc.tipo AS tipo_condicao,
+    fp.observacoes,
+    fp.data_registro
+FROM clientes cli
+LEFT JOIN ficha_paciente fp ON cli.id = fp.cliente_id
+LEFT JOIN catalogo_condicoes cc ON fp.condicao_id = cc.id;
+
+-- View: agenda completa dos médicos
+CREATE OR REPLACE VIEW vw_agenda_medicos AS
+SELECT
+    m.id AS medico_id,
+    m.nome AS medico,
+    m.especialidade,
+    ha.dia_semana,
+    ha.horario_inicio,
+    ha.horario_fim,
+    c.data_consulta,
+    c.horario AS horario_consulta,
+    c.cliente_id
+FROM medicos m
+LEFT JOIN horarios_atendimento ha ON ha.medico_id = m.id
+LEFT JOIN consultas c 
+    ON c.medico_id = m.id 
+    AND c.horario BETWEEN ha.horario_inicio AND ha.horario_fim;
+
+-- View: ficha resumida de pacientes
+CREATE OR REPLACE VIEW vw_pacientes_resumo AS
+SELECT 
+    cli.id,
+    cli.nome,
+    cli.idade,
+    cli.email,
+    cli.telefone,
+    cli.tipo_sanguineo,
+    COUNT(fp.condicao_id) AS total_condicoes
+FROM clientes cli
+LEFT JOIN ficha_paciente fp ON cli.id = fp.cliente_id
+GROUP BY cli.id;
