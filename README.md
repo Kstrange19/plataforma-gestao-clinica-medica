@@ -1,20 +1,26 @@
 # Plataforma de gestão de clínica médica
 
 ## Descrição
+
 Projeto de desenvolvimento de uma plataforma de gestão de clínica médica com interface em Python para gerenciar cadastros ou consultar disponibilidade de horários.
 
 ## Autores
+
 - Kauã Amado
 - Moisés Campos
 
 ## Tecnologias Utilizadas
+
+- Docker 29.0.4
 - MySQL Workbench 8.0
 - Python 3.12.3
 
 ## Modelo de Dados
+
 - Modelo relacional (MySQL 8.0)
 
 ### Entidades Principais
+
 - **medicos**: Cadastro dos profissionais, incluindo especialidade e contato.
 - **clientes**: Dados pessoais dos pacientes, incluindo tipo sanguíneo (Fator RH).
 - **consultas**: Tabela central que registra os agendamentos, vinculando médico e paciente.
@@ -23,6 +29,7 @@ Projeto de desenvolvimento de uma plataforma de gestão de clínica médica com 
 - **ficha_paciente**: Prontuário médico que registra o histórico de saúde (Relacionamento N:M entre Clientes e Condições).
 
 ### Relacionamentos
+
 - **[medicos] 1 → N [consultas]**: Um médico pode realizar diversas consultas, mas uma consulta pertence a apenas um médico.
 - **[clientes] 1 → N [consultas]**: Um paciente pode agendar várias consultas ao longo do tempo.
 - **[medicos] 1 → N [horarios_atendimento]**: Um médico possui vários horários de disponibilidade cadastrados na semana.
@@ -48,6 +55,7 @@ Projeto de desenvolvimento de uma plataforma de gestão de clínica médica com 
 ## 🚀 Como Executar
 
 ### 1. Preparar o Ambiente Python
+
 Recomendamos o uso de um ambiente virtual para isolar as dependências do projeto.
 
 ```bash
@@ -65,11 +73,13 @@ pip install mysql-connector-python
 ```
 
 ### 2. Subir o Banco de Dados
+
 ```bash
 sudo docker compose up -d # Aguarde alguns segundos na primeira execução para que o container carregue tudo.
 ```
 
 ### Executar o sistema
+
 ```bash
 python main.py
 ```
@@ -79,6 +89,7 @@ python main.py
 O projeto utiliza um volume Docker (`./mysql_data`) para garantir que os dados não sejam perdidos quando o container é desligado.
 
 - **Para resetar o banco de dados:** Se você alterar o arquivo `schema.sql` e precisar recriar o banco do zero, execute os seguintes comandos:
+
   ```bash
   docker compose down
   # No Linux/Mac:
