@@ -4,22 +4,26 @@
 # Autores: Kauã Amado e Moisés Henrique
 # Data: 02/12/2025
 # =============================================
+
+-- Comando de segurança para limpar o banco de dados antes de recriar
+DROP DATABASE IF EXISTS clinica_medica;
+
 CREATE DATABASE IF NOT EXISTS clinica_medica CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE clinica_medica;
-SET NAMES utf8mb4; # Garante leitura correta de caracteres especiais
+SET NAMES utf8mb4; 
 
-# Médicos
+# Tabela: Medicos
 CREATE TABLE IF NOT EXISTS medicos (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
     especialidade VARCHAR(50) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     telefone VARCHAR(11) UNIQUE NOT NULL,
-    senha_hash VARCHAR(255) # Compatibilidade com main.py
+    senha_hash VARCHAR(255)
 );
 CREATE INDEX idx_medicos_nome ON medicos(nome);
 
-# Pacientes
+# Tabela: Pacientes
 CREATE TABLE IF NOT EXISTS pacientes (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
@@ -27,12 +31,12 @@ CREATE TABLE IF NOT EXISTS pacientes (
     email VARCHAR(100) UNIQUE NOT NULL,
     telefone VARCHAR(11),
     tipo_sanguineo ENUM('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-') NOT NULL,
-    cpf VARCHAR(11) UNIQUE, # Necessário para main.py
-    senha_hash VARCHAR(255) # Necessário para main.py
+    cpf VARCHAR(11) UNIQUE,
+    senha_hash VARCHAR(255)
 );
 CREATE INDEX idx_pacientes_nome ON pacientes(nome);
 
-# Consultas
+# Tabela: Consultas
 CREATE TABLE IF NOT EXISTS consultas (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     paciente_id INT UNSIGNED,
@@ -48,8 +52,8 @@ CREATE INDEX idx_consultas_paciente ON consultas(paciente_id);
 CREATE INDEX idx_consultas_medico ON consultas(medico_id);
 CREATE INDEX idx_consultas_data_hora ON consultas(data_consulta, hora_consulta);
 
-# Horários de atendimento
-CREATE TABLE horarios_atendimento (
+# Tabela: Horarios_Atendimento
+CREATE TABLE IF NOT EXISTS horarios_atendimento (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     medico_id INT UNSIGNED,
     dia_semana VARCHAR(20),
@@ -59,14 +63,14 @@ CREATE TABLE horarios_atendimento (
 );
 CREATE INDEX idx_horarios_medico_dia ON horarios_atendimento(medico_id, dia_semana);
 
-# Catálogo de condições
+# Tabela: Catalogo_Condicoes
 CREATE TABLE IF NOT EXISTS catalogo_condicoes (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL UNIQUE,
     tipo ENUM('Fumante', 'Alergia', 'Doença Crônica', 'Cirurgia', 'Medicamento regular', 'Outros') NOT NULL
 );
 
-# Ficha médica (Relacionamento N:M)
+# Tabela: Ficha_Paciente (N:M)
 CREATE TABLE IF NOT EXISTS ficha_paciente (
     paciente_id INT UNSIGNED,
     condicao_id INT UNSIGNED,
@@ -78,30 +82,30 @@ CREATE TABLE IF NOT EXISTS ficha_paciente (
 );
 CREATE INDEX idx_ficha_paciente ON ficha_paciente(paciente_id);
 
-# Inserções de exemplo
-INSERT INTO medicos (nome, especialidade, email, telefone) VALUES
-('Paulo Roberto', 'Pneumologia', 'prmnasc@clinica.com','21965386364'),
-('Ewerton Madruga', 'Dermatologia', 'elmadruga@clinica.com', '21994485533'),
-('Wladimir Chapetta', 'Endocrinologia', 'wcchapetta@clinica.com', '21999999999'),
-('Roberto Amaral', 'Cardiologia',  'rlamaral@clinica.com', '21992668215'),
-('Mariana Carla', 'Ginecologia', 'marianacarla@clinica.com', '21979681241'),
-('Antônio Lacerda', 'Psiquiatria', 'aljunior@clinica.com', '24981543287');
+# Inserções de Exemplo
+INSERT INTO medicos (nome, especialidade, email, telefone, senha_hash) VALUES
+('Paulo Roberto', 'Pneumologia', 'prmnasc@clinica.com','21965386364', 'dummyhash'),
+('Ewerton Madruga', 'Dermatologia', 'elmadruga@clinica.com', '21994485533', 'dummyhash'),
+('Wladimir Chapetta', 'Endocrinologia', 'wcchapetta@clinica.com', '21999999999', 'dummyhash'),
+('Roberto Amaral', 'Cardiologia',  'rlamaral@clinica.com', '21992668215', 'dummyhash'),
+('Mariana Carla', 'Ginecologia', 'marianacarla@clinica.com', '21979681241', 'dummyhash'),
+('Antônio Lacerda', 'Psiquiatria', 'aljunior@clinica.com', '24981543287', 'dummyhash');
 
 INSERT INTO pacientes (nome, idade, email, telefone, tipo_sanguineo, cpf, senha_hash) VALUES
 ('Kauã Amado', 17, 'kauaamado5@gmail.com', '21974392787', 'A+', '00000000000', 'dummyhash'),
 ('Moises Campos', 18, 'moiseshoc27@gmail.com', '21972701348', 'O-', '00000000001', 'dummyhash'),
 ('Estevão Martins', 17, 'estevaomartins@gmail.com', '21972963756', 'B+', '00000000002', 'dummyhash'),
-('Matheus Marques', 18, 'marquesaraujomatheus7@gmail.com', '21979513613', 'AB+', '00000000003', 'dummyhash'),
-('Raphael Furtado', 16, 'raphaelfurtado120@gmail.com', '2190979950', 'O+', '00000000004', 'dummyhash'),
+('Matheus Maques', 18, 'marquesaraujomatheus7@gmail.com', '2199513613', 'AB+', '00000000003', 'dummyhash'),
+('Raphael Furtado', 16, 'raphaelfurtado120@gmail.com', '219979950', 'O+', '00000000004', 'dummyhash'),
 ('Dominique Gomes', 17, 'niquegbarbosa@gmail.com', '21970763935', 'A-', '00000000005', 'dummyhash');
 
 INSERT INTO consultas (paciente_id, medico_id, data_consulta, hora_consulta, motivo, status) VALUES
-(1, 1, '2024-12-02', '10:00:00', 'Tosse com sangue', 'Agendada'),
-(1, 2, '2024-12-11', '14:30:00', 'Mancha na pele', 'Agendada'),
-(3, 3, '2024-12-12', '09:00:00', 'Check-up anual', 'Agendada'),
-(2, 6, '2024-12-15', '11:00:00', 'Ansiedade e insônia', 'Agendada'),
-(4, 4, '2024-12-18', '13:30:00', 'Dor no peito', 'Agendada'),
-(6, 5, '2024-12-20', '15:00:00', 'Check-up trimestral', 'Agendada');
+(1, 1, '2025-12-02', '10:00:00', 'Tosse com sangue', 'Agendada'),
+(1, 2, '2025-12-11', '14:30:00', 'Mancha na pele', 'Agendada'),
+(3, 3, '2025-12-12', '09:00:00', 'Check-up anual', 'Agendada'),
+(2, 6, '2025-12-15', '11:00:00', 'Ansiedade e insônia', 'Agendada'),
+(4, 4, '2025-12-18', '13:30:00', 'Dor no peito', 'Agendada'),
+(6, 5, '2025-12-20', '15:00:00', 'Check-up trimestral', 'Agendada');
 
 INSERT INTO horarios_atendimento (medico_id, dia_semana, horario_inicio, horario_fim) VALUES
 (1, 'Segunda', '07:30:00', '11:00:00'),
@@ -121,7 +125,7 @@ INSERT INTO horarios_atendimento (medico_id, dia_semana, horario_inicio, horario
 (6, 'Quinta', '08:00:00', '12:00:00'),
 (6, 'Quinta', '13:00:00', '17:00:00');
 
-INSERT INTO catalogo_condicoes (nome, tipo) VALUES 
+INSERT INTO catalogo_condicoes (nome, tipo) VALUES  
 ('Penicilina', 'Alergia'),
 ('Dipirona', 'Alergia'),
 ('Hipertensão', 'Doença Crônica'),
@@ -134,13 +138,13 @@ INSERT INTO catalogo_condicoes (nome, tipo) VALUES
 ('Insulina', 'Medicamento regular'),
 ('Apendicectomia', 'Cirurgia');
 
-INSERT INTO ficha_paciente (paciente_id, condicao_id, observacoes) VALUES 
+INSERT INTO ficha_paciente (paciente_id, condicao_id, observacoes) VALUES  
 (1, 2, 'Teve reação na infância'),
 (1, 3, 'Controlada com remédios');
 
 # Views do sistema
 CREATE OR REPLACE VIEW view_consultas_completas AS
-SELECT 
+SELECT  
     c.id AS consulta_id,
     p.nome AS paciente,
     m.nome AS medico,
@@ -156,10 +160,10 @@ JOIN medicos m ON c.medico_id = m.id;
 CREATE OR REPLACE VIEW vw_consultas_futuras AS
 SELECT *
 FROM view_consultas_completas
-WHERE data_consulta >= CURRENT_DATE;
+WHERE data_consulta >= CURRENT_DATE();
 
 CREATE OR REPLACE VIEW vw_pacientes_com_condicoes AS
-SELECT 
+SELECT  
     p.id AS paciente_id,
     p.nome,
     p.idade,
@@ -192,7 +196,7 @@ LEFT JOIN consultas c
     AND c.hora_consulta BETWEEN ha.horario_inicio AND ha.horario_fim;
 
 CREATE OR REPLACE VIEW vw_pacientes_resumo AS
-SELECT 
+SELECT  
     p.id,
     p.nome,
     p.idade,
@@ -203,4 +207,3 @@ SELECT
 FROM pacientes p
 LEFT JOIN ficha_paciente fp ON p.id = fp.paciente_id
 GROUP BY p.id;
-8
