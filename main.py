@@ -16,7 +16,7 @@ def connect_db():
     try:
         cnx = mysql.connector.connect(
             host="127.0.0.1",
-            port=3306,
+            port=3308,
             user="root",
             password="123",
             database="clinica_medica"
