@@ -152,7 +152,7 @@ def list_doctors(cursor):
             return
         for row in results:
             print(f"ID: {row[0]} | Nome: {row[1]} | Especialidade: {row[2]}")
-        print("---------------------------")
+        print("===========================================")
     except Error as e:
         print(f"Erro ao listar médicos: {e}")
 
@@ -167,7 +167,7 @@ def list_patients(cursor):
             return
         for row in results:
             print(f"ID: {row[0]} | Nome: {row[1]} | CPF: {row[2]}")
-        print("---------------------------")
+        print("===============================================")
     except Error as e:
         print(f"Erro ao listar pacientes: {e}")
 
@@ -197,7 +197,7 @@ def list_doctor_availability(cursor):
             if nome != current_doctor:
                 if current_doctor is not None:
                     print("---")
-                print(f"**Médico:** {nome} ({especialidade})")
+                print(f"Médico: {nome} ({especialidade})")
                 current_doctor = nome
             
             # Formata os horários para melhor leitura
