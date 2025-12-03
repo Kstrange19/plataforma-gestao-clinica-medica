@@ -123,7 +123,7 @@ def check_appointment_availability(doctor_id, appointment_date, appointment_time
     """
     cursor.execute(time_query, (doctor_id, weekday, appointment_time, appointment_time))
     if not cursor.fetchone():
-        print(f"O médico de ID-{doctor_id} não atende {weekday} nesse horário.")
+        print(f"O médico de ID-{doctor_id} não atende {weekday.lower()} nesse horário.")
         return False
 
     # Verifica conflitos com consultas já agendadas
