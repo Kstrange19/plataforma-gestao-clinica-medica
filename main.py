@@ -27,7 +27,6 @@ def connect_db():
         print(f"Erro ao conectar ao banco de dados: {e}", file=sys.stderr)
         return None
 
-# Validações de Entrada
 def validate_input(value, length, name):
     """Verifica se o valor é numérico e tem o comprimento correto."""
     value_clean = str(value).strip()
@@ -55,8 +54,8 @@ def get_blood_type_from_menu():
         except ValueError:
             print("Entrada inválida. Digite um número.")
 
-# Cadastro de pacientes
-def register_client(name, age, email, phone, blood_type, cpf, cursor, cnx):
+def register_patient(name, age, email, phone, blood_type, cpf, cursor, cnx):
+    """Cadastra pacientes no banco de dados."""
     try:
         sql = """
             INSERT INTO pacientes
@@ -101,6 +100,7 @@ def schedule_appointment(doctor_id, patient_id, appointment_date, appointment_ti
 
 # Verificação de disponibilidade
 def check_appointment_availability(doctor_id, appointment_date, appointment_time, cursor):
+    """Verifica disponibilidade de horários para futuramente agendar uma consulta"""
     days_translation = {
         'Monday': 'Segunda',
         'Tuesday': 'Terca',
@@ -117,7 +117,7 @@ def check_appointment_availability(doctor_id, appointment_date, appointment_time
     time_query = """
         SELECT id FROM horarios_atendimento
         WHERE medico_id = %s
-        AND da_semana = %s
+        AND dia_semana = %s
         AND horario_inicio <= %s
         AND horario_fim > %s
     """
@@ -141,7 +141,6 @@ def check_appointment_availability(doctor_id, appointment_date, appointment_time
 
     return True
 
-# Listagem de Médicos e Pacientes
 def list_doctors(cursor):
     """Lista IDs e nomes de médicos disponíveis."""
     try:
@@ -172,7 +171,6 @@ def list_patients(cursor):
     except Error as e:
         print(f"Erro ao listar pacientes: {e}")
 
-# Listagem de Horários dos Médicos
 def list_doctor_availability(cursor):
     """Lista o dia da semana e o horário de atendimento de todos os médicos."""
     try:
@@ -213,8 +211,8 @@ def list_doctor_availability(cursor):
     except Error as e:
         print(f"Erro ao listar horários de atendimento: {e}")
 
-# Listar consultas completas
 def list_full_appointments(cursor):
+    """Lista as consultas completas registradas no banco de dados."""
     try:
         cursor.execute("SELECT * FROM view_consultas_completas")
         results = cursor.fetchall()
