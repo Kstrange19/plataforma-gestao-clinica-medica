@@ -101,7 +101,7 @@ INSERT INTO medicos (nome, especialidade, email, telefone, senha_hash) VALUES
 ('Paulo Roberto', 'Pneumologia', 'prmnasc@clinica.com','21965386364', 'dummyhash'),
 ('Ewerton Madruga', 'Dermatologia', 'elmadruga@clinica.com', '21994485533', 'dummyhash'),
 ('Wladimir Chapetta', 'Endocrinologia', 'wcchapetta@clinica.com', '21999999999', 'dummyhash'),
-('Roberto Amaral', 'Cardiologia',  'rlamaral@clinica.om', '21992668215', 'dummyhash'),
+('Roberto Amaral', 'Cardiologia',  'rlamaral@clinica.com', '21992668215', 'dummyhash'),
 ('Mariana Carla', 'Ginecologia', 'marianacarla@clinica.com', '21979681241', 'dummyhash'),
 ('Antônio Lacerda', 'Psiquiatria', 'aljunior@clinica.com', '24981543287', 'dummyhash');
 
@@ -226,4 +226,4 @@ SELECT  
     COUNT(fp.condicao_id) AS total_condicoes
 FROM pacientes p
 LEFT JOIN ficha_paciente fp ON p.id = fp.paciente_id
-GROUP BY p.id;c
+GROUP BY p.id;
