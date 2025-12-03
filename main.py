@@ -103,9 +103,9 @@ def check_appointment_availability(doctor_id, appointment_date, appointment_time
     """Verifica disponibilidade de horários para futuramente agendar uma consulta"""
     days_translation = {
         'Monday': 'Segunda',
-        'Tuesday': 'Terca',
+        'Tuesday': 'Terça',
         'Wednesday': 'Quarta',
-        'Thursdy': 'Quinta', # <--- CORRIGIDO: Era 'Thursdy'
+        'Thursdy': 'Quinta',
         'Friday': 'Sexta',
         'Saturday': 'Sabado',
         'Sunday': 'Domingo'
@@ -123,7 +123,7 @@ def check_appointment_availability(doctor_id, appointment_date, appointment_time
     """
     cursor.execute(time_query, (doctor_id, weekday, appointment_time, appointment_time))
     if not cursor.fetchone():
-        print(f"Médico ID {doctor_id} não atende em {weekday} neste horário.")
+        print(f"O médico de ID-{doctor_id} não atende {weekday} nesse horário.")
         return False
 
     # Verifica conflitos com consultas já agendadas
