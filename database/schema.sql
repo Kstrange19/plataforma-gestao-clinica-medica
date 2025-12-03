@@ -8,11 +8,12 @@
 -- Comando de segurança para limpar o banco de dados antes de recriar
 DROP DATABASE IF EXISTS clinica_medica;
 
+-- Criacao, Conectividade, acessibilidade do banco de dados 
 CREATE DATABASE IF NOT EXISTS clinica_medica CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE clinica_medica;
 SET NAMES utf8mb4; 
 
-# Tabela: Medicos
+-- Tabela: Medicos
 CREATE TABLE IF NOT EXISTS medicos (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
@@ -21,9 +22,11 @@ CREATE TABLE IF NOT EXISTS medicos (
     telefone VARCHAR(11) UNIQUE NOT NULL,
     senha_hash VARCHAR(255)
 );
+
+-- Indice: Medicos
 CREATE INDEX idx_medicos_nome ON medicos(nome);
 
-# Tabela: Pacientes
+-- Tabela: Pacientes
 CREATE TABLE IF NOT EXISTS pacientes (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
@@ -34,9 +37,11 @@ CREATE TABLE IF NOT EXISTS pacientes (
     cpf VARCHAR(11) UNIQUE,
     senha_hash VARCHAR(255)
 );
+
+-- Indice: pacientes
 CREATE INDEX idx_pacientes_nome ON pacientes(nome);
 
-# Tabela: Consultas
+-- Tabela: Consultas
 CREATE TABLE IF NOT EXISTS consultas (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     paciente_id INT UNSIGNED,
@@ -48,11 +53,13 @@ CREATE TABLE IF NOT EXISTS consultas (
     FOREIGN KEY (paciente_id) REFERENCES pacientes(id),
     FOREIGN KEY (medico_id) REFERENCES medicos(id)
 );
+
+-- Criacao dos indices dos pacientes
 CREATE INDEX idx_consultas_paciente ON consultas(paciente_id);
 CREATE INDEX idx_consultas_medico ON consultas(medico_id);
 CREATE INDEX idx_consultas_data_hora ON consultas(data_consulta, hora_consulta);
 
-# Tabela: Horarios_Atendimento
+-- Tabela: horarios de atendimento
 CREATE TABLE IF NOT EXISTS horarios_atendimento (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     medico_id INT UNSIGNED,
@@ -61,16 +68,18 @@ CREATE TABLE IF NOT EXISTS horarios_atendimento (
     horario_fim TIME,
     FOREIGN KEY (medico_id) REFERENCES medicos(id)
 );
+
+-- Indice: disponibilidade dos medicos
 CREATE INDEX idx_horarios_medico_dia ON horarios_atendimento(medico_id, dia_semana);
 
-# Tabela: Catalogo_Condicoes
+-- Tabela: catalogo de condicoes
 CREATE TABLE IF NOT EXISTS catalogo_condicoes (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL UNIQUE,
     tipo ENUM('Fumante', 'Alergia', 'Doença Crônica', 'Cirurgia', 'Medicamento regular', 'Outros') NOT NULL
 );
 
-# Tabela: Ficha_Paciente (N:M)
+-- Tabela: Ficha_Paciente (N:M)
 CREATE TABLE IF NOT EXISTS ficha_paciente (
     paciente_id INT UNSIGNED,
     condicao_id INT UNSIGNED,
@@ -80,9 +89,11 @@ CREATE TABLE IF NOT EXISTS ficha_paciente (
     FOREIGN KEY (paciente_id) REFERENCES pacientes(id),
     FOREIGN KEY (condicao_id) REFERENCES catalogo_condicoes(id)
 );
+
+-- Paciente cadastrado
 CREATE INDEX idx_ficha_paciente ON ficha_paciente(paciente_id);
 
-# Inserções de Exemplo
+-- Inserções de Exemplo
 INSERT INTO medicos (nome, especialidade, email, telefone, senha_hash) VALUES
 ('Paulo Roberto', 'Pneumologia', 'prmnasc@clinica.com','21965386364', 'dummyhash'),
 ('Ewerton Madruga', 'Dermatologia', 'elmadruga@clinica.com', '21994485533', 'dummyhash'),
@@ -142,7 +153,7 @@ INSERT INTO ficha_paciente (paciente_id, condicao_id, observacoes) VALUES
 (1, 2, 'Teve reação na infância'),
 (1, 3, 'Controlada com remédios');
 
-# Views do sistema
+-- Views do sistema
 CREATE OR REPLACE VIEW view_consultas_completas AS
 SELECT  
     c.id AS consulta_id,
@@ -157,11 +168,13 @@ FROM consultas c
 JOIN pacientes p ON c.paciente_id = p.id
 JOIN medicos m ON c.medico_id = m.id;
 
+-- View: consultas futuras
 CREATE OR REPLACE VIEW vw_consultas_futuras AS
 SELECT *
 FROM view_consultas_completas
 WHERE data_consulta >= CURRENT_DATE();
 
+-- View: resumo de pacientes com certas condicoes
 CREATE OR REPLACE VIEW vw_pacientes_com_condicoes AS
 SELECT  
     p.id AS paciente_id,
@@ -178,6 +191,7 @@ FROM pacientes p
 LEFT JOIN ficha_paciente fp ON p.id = fp.paciente_id
 LEFT JOIN catalogo_condicoes cc ON fp.condicao_id = cc.id;
 
+-- View: resumo da agenda dos medicos
 CREATE OR REPLACE VIEW vw_agenda_medicos AS
 SELECT
     m.id AS medico_id,
@@ -195,6 +209,7 @@ LEFT JOIN consultas c
     ON c.medico_id = m.id 
     AND c.hora_consulta BETWEEN ha.horario_inicio AND ha.horario_fim;
 
+-- View: resumo geral dos pacientes
 CREATE OR REPLACE VIEW vw_pacientes_resumo AS
 SELECT  
     p.id,
