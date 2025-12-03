@@ -334,7 +334,7 @@ while True:
             if cpf is None:
                 continue
         
-        register_client(name, age, email, phone, blood_type, cpf, cursor, cnx)
+        register_patient(name, age, email, phone, blood_type, cpf, cursor, cnx)
 
     elif choice == 4:
         # Cadastrar médico - COM VALIDAÇÃO (adaptado)
