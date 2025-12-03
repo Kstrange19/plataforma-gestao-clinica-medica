@@ -155,7 +155,11 @@ INSERT INTO catalogo_condicoes (nome, tipo) VALUES  
 
 INSERT INTO ficha_paciente (paciente_id, condicao_id, observacoes) VALUES  
 (1, 2, 'Teve reação na infância'),
-(1, 3, 'Controlada com remédios');
+(1, 3, 'Controlada com remédios'),
+(2, 4, 'Recém-diagnosticado, uso de metformina'), 
+(3, 5, 'Fumante de longa data, buscando cessação'),
+(4, 8, 'Alergia severa, evita consumo'),
+(6, 11, 'Cirurgia realizada há 5 anos, sem complicações');
 
 -- Views do sistema
 -- View: consultas marcadas
